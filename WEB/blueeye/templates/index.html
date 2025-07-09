@@ -11,7 +11,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title><strong>BLUE EYE.co</title>
+	<title>BLUE EYE.co</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Free HTML5 Website Template by FreeHTML5.co" />
 	<meta name="keywords"
@@ -109,8 +109,8 @@
 							</div>
 
 							<!-- Right: Button -->
-							<div class="col-md-4 animate-box d-flex justify-content-end"
-								data-animate-effect="fadeInUp" style="margin-top: 4em;">
+							<div class="col-md-4 animate-box d-flex justify-content-end" data-animate-effect="fadeInUp"
+								style="margin-top: 4em;">
 								<button id="scrollToFormBtn" class="btn btn-primary btn-lg mt-4">Book Now</button>
 							</div>
 						</div>
@@ -120,38 +120,58 @@
 		</header>
 
 		<div class="gtco-section" id="bookingForm">
-            <div class="gtco-container">
-                <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
-                    <h2>Book Your Trip</h2>
-                </div>
-                <form class="form-group" id="product-form">
-                    <div class="col-md-6">
-                        <label for="name">Name</label>
-                        <input type="text" class="form-control" id="name" placeholder="Enter Your Name">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="mobile">Mobile</label>
-                        <input type="number" class="form-control" id="mobile" placeholder="Enter Your Mobile Number">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="destination">Destination</label>
-                        <input type="text" class="form-control" id="destination" placeholder="Enter Your Destination">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="members">Number of Members</label>
-                        <input type="number" class="form-control" id="members" placeholder="Enter Number of Members">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="description">Trip Suggestion</label>
-                        <textarea class="form-control" id="description" rows="3"
-                            placeholder="Tell us about your trip"></textarea>
-                    </div>
-					<div class="col-md-6"  style="margin-top: 35px;">
-					<button class="btn btn-success mt-3" type="submit">Submit</button>
+			<div class="gtco-container">
+				<div class="col-md-8 col-md-offset-2 text-center gtco-heading">
+					<h2>Book Your Trip</h2>
 				</div>
-                </form>
-            </div>
-        </div>
+				<form class="form-group" id="booking-form" method="post" action="{% url 'myview' %}">
+					{% csrf_token %}
+					<div class="col-md-6">
+						<label for="name">Name</label>
+						{{ form.name }}
+					</div>
+
+					<div class="col-md-6">
+						<label for="mobile">Mobile</label>
+						{{ form.mobile }}
+					</div>
+
+					<div class="col-md-6">
+						<label for="destination">Destinations</label>
+						{{ form.destination }}
+					</div>
+
+					<div class="col-md-6">
+						<label for="members">Number of Members</label>
+						{{ form.members }}
+					</div>
+
+					<div class="col-md-6">
+						<label for="date_from">Date From</label>
+						{{ form.date_from }}
+					</div>
+
+					<div class="col-md-6">
+						<label for="date_upto">Date Upto</label>
+						{{ form.date_upto }}
+					</div>
+
+					<div class="col-md-6">
+						<label for="package">Select Package</label>
+						{{ form.package }}
+					</div>
+
+					<div class="col-md-6">
+						<label for="description">Trip Suggestion</label>
+						{{ form.suggestion }}
+					</div>
+
+					<div class="col-md-6" style="margin-top: 35px;">
+						<button class="btn btn-success mt-3" type="submit">Submit</button>
+					</div>
+				</form>
+			</div>
+		</div>
 		<div class="gtco-section">
 			<div class="gtco-container">
 				<div class="row">
@@ -435,9 +455,9 @@
 				<div class="row copyright">
 					<div class="col-md-12">
 						<p class="pull-left">
-                            <small class="block">&copy; 2025 Blue Eye Holidays. All Rights Reserved.</small>
-                            <small class="block">Designed by MDGroups</small>
-                        </p>
+							<small class="block">&copy; 2025 Blue Eye Holidays. All Rights Reserved.</small>
+							<small class="block">Designed by MDGroups</small>
+						</p>
 						<p class="pull-right">
 						<ul class="gtco-social-icons pull-right">
 							<li><a href="#"><i class="icon-twitter"></i></a></li>
@@ -488,19 +508,19 @@
 
 	<!-- jQuery must be loaded BEFORE this script -->
 	<script>
-        $(document).ready(function () {
-            $('#scrollToFormBtn').click(function () {
-                const target = $('#bookingForm');
-                if (target.length) {
-                    $('html, body').animate({
-                        scrollTop: target.offset().top
-                    }, 800);
-                } else {
-                    alert("Target form not found!");
-                }
-            });
-        });
-    </script>
+		$(document).ready(function () {
+			$('#scrollToFormBtn').click(function () {
+				const target = $('#bookingForm');
+				if (target.length) {
+					$('html, body').animate({
+						scrollTop: target.offset().top
+					}, 800);
+				} else {
+					alert("Target form not found!");
+				}
+			});
+		});
+	</script>
 
 
 
