@@ -23,4 +23,18 @@ class Customer(models.Model):
         ],
         default='pending'
     )
+class User(models.Model):
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15, unique=True)
+    password = models.CharField(max_length=128)
+    user_type = models.CharField(
+        max_length=10,
+        choices=[
+            ('Driver', 'Driver'),
+            ('Owner', 'Owner'),
+        ],
+        default='Owner'
+    )
+    device_token = models.CharField(max_length=256, blank=True, null=True)
+
 
