@@ -10,7 +10,7 @@ Future<String> login({
 }) async {
   try {
     final response = await http.post(
-      Uri.parse('http://192.168.1.17:8000/api/login/'),
+      Uri.parse('http://127.0.0.1:8000/api/login/'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode({
         'name': name,
@@ -93,7 +93,8 @@ class Customer {
 
 
 class ApiService {
-  final String baseUrl = 'http://192.168.1.17:8000/api'; // change if hosted
+  // final String baseUrl = 'http://192.168.1.17:8000/api'; 
+  final String baseUrl = 'http://127.0.0.1:8000/api';
 
   Future<List<Customer>> fetchCustomers() async {
     try {
