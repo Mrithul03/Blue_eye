@@ -1,35 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'api.dart'; 
-import 'home.dart'; 
+import 'api.dart';
+import 'home.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('device_token');
-
-  runApp(MyApp(initialRoute: token != null ? '/home' : '/login'));
+void main() {
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final String initialRoute;
+  const MyApp({super.key});
 
-  const MyApp({super.key, required this.initialRoute});
+  Future<Widget> _getStartScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('device_token');
+    if (token != null && token.isNotEmpty) {
+      return const HomePage(); // or pass token if needed
+    } else {
+      return const LoginPage();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Blue Eye Login',
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      initialRoute: initialRoute,
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/login/home': (context) => const HomePage(),
-      },
+      home: FutureBuilder(
+        future: _getStartScreen(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          } else if (snapshot.hasData) {
+            return snapshot.data!;
+          } else {
+            return const Scaffold(
+              body: Center(child: Text("Error loading app")),
+            );
+          }
+        },
+      ),
     );
   }
 }
@@ -42,32 +56,54 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   String _userType = 'Driver';
-  bool _isLoading = false;
+  String _errorMessage = '';
+  bool _loading = false;
 
   Future<void> _handleLogin() async {
-    final api = ApiService();
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text.trim();
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _loading = true;
+      _errorMessage = '';
+    });
 
-    final success = await api.loginUser(
-      phone: _phoneController.text.trim(),
-      password: _passwordController.text.trim(),
-      userType: _userType,
-    );
-
-    setState(() => _isLoading = false);
-
-    if (success) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login failed. Please check your credentials.'),
-        ),
+    try {
+      final token = await login(
+        name: name,
+        phone: phone,
+        password: password,
+        userType: _userType, // uses the correct class-level value
       );
+
+      if (token.isNotEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('device_token', token);
+
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      } else {
+        setState(() {
+          _errorMessage = 'Invalid phone or password.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Login error: ${e.toString()}';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
@@ -82,6 +118,15 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.name,
+            ),
+            const SizedBox(height: 15),
             TextField(
               controller: _phoneController,
               decoration: const InputDecoration(
@@ -117,12 +162,15 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 25),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _handleLogin,
-                    child: const Text('Login'),
-                  ),
+            if (_loading) const CircularProgressIndicator(),
+            if (!_loading)
+              ElevatedButton(
+                onPressed: _handleLogin,
+                child: const Text('Login'),
+              ),
+            const SizedBox(height: 10),
+            if (_errorMessage.isNotEmpty)
+              Text(_errorMessage, style: const TextStyle(color: Colors.red)),
           ],
         ),
       ),

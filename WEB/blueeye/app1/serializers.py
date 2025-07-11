@@ -1,14 +1,11 @@
-# serializers.py
 from rest_framework import serializers
-from .models import User
-
-class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField()
-    password = serializers.CharField()
-    user_type = serializers.ChoiceField(choices=['Driver', 'Owner'], default='Owner')
-
+from .models import Customer,User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'phone', 'user_type', 'device_token']
+        fields = ['id', 'name', 'phone','password', 'user_type']
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields =['id','name', 'mobile', 'destination', 'members', 'date_from', 'date_upto', 'package', 'suggestion', 'status' ]

@@ -4,8 +4,8 @@ from .forms import BookingForm
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import LoginSerializer,UserSerializer 
-from  .models import User
+from .serializers import UserSerializer,CustomerSerializer
+from  .models import User,Customer
 import uuid
 
 class Myview(View):
@@ -31,22 +31,42 @@ class Booking(View):
 
 @api_view(['POST'])
 def login_user(request):
-    serializer = LoginSerializer(data=request.data)
-    if serializer.is_valid():
-        phone = serializer.validated_data['phone']
-        password = serializer.validated_data['password']
-        user_type = serializer.validated_data['user_type']
+    data = request.data
+    phone = data.get('phone')
+    password = data.get('password')
 
-        try:
-            user = User.objects.get(phone=phone, password=password, user_type=user_type)
-        except User.DoesNotExist:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        user = User.objects.get(phone=phone)
 
-        # Generate or return device_token
-        if not user.device_token:
-            user.device_token = str(uuid.uuid4())  # import uuid at the top
-            user.save()
+        # Check password
+        if user.password != password:
+            return Response({'error': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Generate and update new device token
+        user.device_token = str(uuid.uuid4())
+        user.save()
 
         return Response({'device_token': user.device_token}, status=status.HTTP_200_OK)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except User.DoesNotExist:
+        # Register new user if not found
+        name = data.get('name')
+        user_type = data.get('user_type')
+        device_token = str(uuid.uuid4())
+
+        user = User.objects.create(
+            name=name,
+            phone=phone,
+            password=password,
+            user_type=user_type,
+            device_token=device_token
+        )
+
+        return Response({'device_token': user.device_token}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def customer_list(request):
+    customers = Customer.objects.all()  # Fetch all customers
+    serializer = CustomerSerializer(customers, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
