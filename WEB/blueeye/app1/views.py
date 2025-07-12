@@ -28,6 +28,10 @@ class Booking(View):
     def get(self,request):
         return render(request,'booking.html')
     
+class Conatct(View):
+    def get(self,request):
+        return render(request,'contact.html')
+    
 
 @api_view(['POST'])
 def login_user(request):

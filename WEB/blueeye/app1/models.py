@@ -14,6 +14,8 @@ class Customer(models.Model):
     date_upto = models.DateField()
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True)
     suggestion = models.TextField() 
+    driver = models.CharField(max_length=100, blank=True)
+    acceptance = models.BooleanField(default=False)
     status = models.CharField(
         max_length=10,
         choices=[
@@ -23,6 +25,7 @@ class Customer(models.Model):
         ],
         default='pending'
     )
+
 class User(models.Model):
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15, unique=True)
