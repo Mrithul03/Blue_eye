@@ -2,55 +2,42 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<String> login({
-  required String name,
-  required String phone,
-  required String password,
-  required String userType,
-}) async {
+/// 🔐 Login and store device_token (DRF token) in SharedPreferences
+Future<String> login({required String phone, required String password}) async {
   try {
     final response = await http.post(
-      // Uri.parse('http://192.168.1.17:8000/api/login/'), 
-      Uri.parse('http://127.0.0.1:8000/api/login/'),
+      Uri.parse('http://192.168.1.17:8000/api/login/'),
+      // Uri.parse('http://127.0.0.1:8000/api/login/'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode({
-        'name': name,
-        'phone': phone,
-        'password': password,
-        'user_type': userType,
-      }),
+      body: jsonEncode({'phone': phone, 'password': password}),
     );
 
     final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
 
     if (response.statusCode == 200 && data.containsKey('device_token')) {
       final token = data['device_token'];
+      final userId = data['user_id'];
 
-      // Save device_token in SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('device_token', token);
-
-      print('🔐 API returned token: $token');
-      print('📦 Stored token in SharedPreferences: ${prefs.getString('device_token')}');
+      await prefs.setInt('user_id', userId); // ✅ Save user_id
 
       return token;
-    } else {
-      print('Server Error: $data');
     }
   } catch (e) {
-    print('Login exception: $e');
+    print('❗ Exception during login: $e');
   }
 
   return '';
 }
 
-// Optional: get token later if needed
+/// 📦 Retrieve saved DRF token from SharedPreferences
 Future<String?> getSavedToken() async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString('device_token');
 }
 
-
+/// 📄 Customer model
 class Customer {
   final int id;
   final String name;
@@ -87,29 +74,139 @@ class Customer {
       dateUpto: json['date_upto'] ?? '',
       packageName: json['package'] ?? '',
       suggestion: json['suggestion'] ?? '',
-      status: json['status'] ?? '', 
+      status: json['status'] ?? '',
     );
   }
 }
 
-class ApiService {
-  // final String baseUrl = 'http://192.168.1.17:8000/api'; 
-  final String baseUrl = 'http://127.0.0.1:8000/api';
+/// 👤 User model
+class UserModel {
+  final int id;
+  final String name;
+  final String phone;
+  final String userType;
 
+  UserModel({
+    required this.id,
+    required this.name,
+    required this.phone,
+    required this.userType,
+  });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      phone: json['phone'] ?? '',
+      userType: json['user_type'] ?? '',
+    );
+  }
+}
+
+/// 📡 API service
+class ApiService {
+  final String baseUrl = 'http://192.168.1.17:8000/api';
+  // final String baseUrl = 'http://127.0.0.1:8000/api';
+
+  /// 📥 Fetch customers (requires auth)
   Future<List<Customer>> fetchCustomers() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/customers/'));
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('device_token');
+
+      if (token == null || token.isEmpty) {
+        print('❌ No token found. User not authenticated.');
+        return [];
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/customers/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Token $token',
+        },
+      );
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonData = jsonDecode(utf8.decode(response.bodyBytes));
+        final List<dynamic> jsonData = jsonDecode(
+          utf8.decode(response.bodyBytes),
+        );
         return jsonData.map((item) => Customer.fromJson(item)).toList();
       } else {
-        print('Error: ${response.body}');
+        print('❌ Server error: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('Exception while fetching customers: $e');
+      print('❗ Exception while fetching customers: $e');
     }
 
     return [];
+  }
+
+  /// 🙋‍♂️ Fetch current user based on token
+  Future<UserModel?> fetchUser() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('device_token');
+      final userId = prefs.getInt('user_id');
+
+      if (token == null || userId == null) {
+        print('❌ Token or user_id not found');
+        return null;
+      }
+
+      final response = await http.get(
+        Uri.parse('http://192.168.1.17:8000/api/users/'),
+        // Uri.parse('http://127.0.0.1:8000/api/users/'),
+        headers: {
+          'Authorization': 'Token $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        for (var userJson in jsonList) {
+          if (userJson['id'] == userId) {
+            return UserModel.fromJson(userJson);
+          }
+        }
+        print('❌ User with ID $userId not found in response');
+      } else {
+        print(
+          '❌ Failed to fetch users: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      print('❗ Exception in fetchUser(): $e');
+    }
+
+    return null;
+  }
+
+  Future<void> updateCustomerStatus(
+    int customerId,
+    String status,
+    String driver,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('device_token'); // From login
+
+    final url = Uri.parse('$baseUrl/customer/$customerId/update/');
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Token $token',
+      },
+      body: jsonEncode({
+        'status': status.toLowerCase(), // Make sure it's lowercase
+        'driver': driver, // Name as string
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update status: ${response.body}');
+    }
   }
 }

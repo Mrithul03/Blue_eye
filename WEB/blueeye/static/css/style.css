@@ -242,6 +242,11 @@ h1, h2, h3, h4, h5, h6, figure {
   background-image: url("/static/images/img.jpg");
 }
 
+#gtco-header-contact{
+  background-image: url("/static/images/contact.jpg");
+}
+
+
 @media screen and (max-width: 992px) {
   #gtco-header.gtco-cover {
     height: inherit !important;

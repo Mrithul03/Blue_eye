@@ -5,7 +5,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'phone','password', 'user_type']
+        
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields =['id','name', 'mobile', 'destination', 'members', 'date_from', 'date_upto', 'package', 'suggestion', 'status' ]
+        fields =['id','name', 'mobile', 'destination', 'members', 'date_from', 'date_upto', 'package', 'suggestion', 'status','driver' ]

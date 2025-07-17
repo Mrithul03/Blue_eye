@@ -10,16 +10,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Future<Widget> _getStartScreen() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('device_token');
-    if (token != null && token.isNotEmpty) {
-      return const HomePage(); // or pass token if needed
-    } else {
-      return const LoginPage();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,26 +18,47 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: FutureBuilder(
-        future: _getStartScreen(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          } else if (snapshot.hasData) {
-            return snapshot.data!;
-          } else {
-            return const Scaffold(
-              body: Center(child: Text("Error loading app")),
-            );
-          }
-        },
-      ),
+      home: const SplashScreen(),
     );
   }
 }
 
+/// 🔄 Splash screen that decides where to navigate
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  Future<Widget> _getStartScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('device_token');
+    if (token != null && token.isNotEmpty) {
+      return const HomePage();
+    } else {
+      return const LoginPage();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _getStartScreen(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasData) {
+          return snapshot.data!;
+        } else {
+          return const Scaffold(
+            body: Center(child: Text("Error loading app")),
+          );
+        }
+      },
+    );
+  }
+}
+
+/// 🔐 Login Page UI + API call
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -56,15 +67,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _userType = 'Driver';
   String _errorMessage = '';
   bool _loading = false;
 
   Future<void> _handleLogin() async {
-    final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -74,17 +82,9 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final token = await login(
-        name: name,
-        phone: phone,
-        password: password,
-        userType: _userType, // uses the correct class-level value
-      );
+      final token = await login(phone: phone, password: password);
 
       if (token.isNotEmpty) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('device_token', token);
-
         if (context.mounted) {
           Navigator.pushReplacement(
             context,
@@ -119,15 +119,6 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.name,
-            ),
-            const SizedBox(height: 15),
-            TextField(
               controller: _phoneController,
               decoration: const InputDecoration(
                 labelText: 'Phone Number',
@@ -144,23 +135,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               obscureText: true,
             ),
-            const SizedBox(height: 15),
-            DropdownButtonFormField<String>(
-              value: _userType,
-              items: const [
-                DropdownMenuItem(value: 'Driver', child: Text('Driver')),
-                DropdownMenuItem(value: 'Owner', child: Text('Owner')),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _userType = value!;
-                });
-              },
-              decoration: const InputDecoration(
-                labelText: 'User Type',
-                border: OutlineInputBorder(),
-              ),
-            ),
             const SizedBox(height: 25),
             if (_loading) const CircularProgressIndicator(),
             if (!_loading)
@@ -174,6 +148,19 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 🚪 Optional logout function
+Future<void> logout(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('device_token');
+
+  if (context.mounted) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
 }
