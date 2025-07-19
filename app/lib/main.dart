@@ -13,9 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Blue Eye Login',
+      title: 'Blue Eyes Login',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 9, 133, 235),
+        ),
         useMaterial3: true,
       ),
       home: const SplashScreen(),
@@ -49,9 +51,7 @@ class SplashScreen extends StatelessWidget {
         } else if (snapshot.hasData) {
           return snapshot.data!;
         } else {
-          return const Scaffold(
-            body: Center(child: Text("Error loading app")),
-          );
+          return const Scaffold(body: Center(child: Text("Error loading app")));
         }
       },
     );
@@ -110,57 +110,111 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login to Blue Eye'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _phoneController,
-              decoration: const InputDecoration(
-                labelText: 'Phone Number',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.phone,
+      body: Stack(
+        children: [
+          // 🔵 Background image
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.1,
+              child: Image.asset('images/logo.jpg', fit: BoxFit.cover),
             ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
+          ),
+
+          // 🔒 Login content
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Card(
+                  color: Colors.white.withOpacity(0.9),
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 🔘 Round logo
+                        ClipOval(
+                          child: Image.asset(
+                            'images/logo.jpg',
+                            height: 70,
+                            width: 70,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // 📛 Title
+                        const Text(
+                          'Login to Blue Eyes',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // 📱 Phone field
+                        TextField(
+                          controller: _phoneController,
+                          decoration: const InputDecoration(
+                            labelText: 'Phone Number',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.phone,
+                        ),
+                        const SizedBox(height: 15),
+                        // 🔐 Password field
+                        TextField(
+                          controller: _passwordController,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            border: OutlineInputBorder(),
+                          ),
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 25),
+                        // 🔘 Loading or Login
+                        if (_loading)
+                          const CircularProgressIndicator()
+                        else
+                          ElevatedButton(
+                            onPressed: _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                2,
+                                118,
+                                172,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 40,
+                                vertical: 14,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text('Login'),
+                          ),
+                        const SizedBox(height: 10),
+                        // ❌ Error message
+                        if (_errorMessage.isNotEmpty)
+                          Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              obscureText: true,
             ),
-            const SizedBox(height: 25),
-            if (_loading) const CircularProgressIndicator(),
-            if (!_loading)
-              ElevatedButton(
-                onPressed: _handleLogin,
-                child: const Text('Login'),
-              ),
-            const SizedBox(height: 10),
-            if (_errorMessage.isNotEmpty)
-              Text(_errorMessage, style: const TextStyle(color: Colors.red)),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-}
-
-/// 🚪 Optional logout function
-Future<void> logout(BuildContext context) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('device_token');
-
-  if (context.mounted) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
 }

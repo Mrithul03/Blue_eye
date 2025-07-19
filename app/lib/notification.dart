@@ -66,192 +66,217 @@ class _NotificationPageState extends State<NotificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Booking Notifications"),
-        backgroundColor: Colors.blue,
-      ),
-      body:
-          _loading
-              ? const Center(child: CircularProgressIndicator())
-              : _bookings.isEmpty
-              ? const Center(
-                child: Text(
-                  "No new bookings",
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              )
-              : ListView.builder(
-                itemCount: _bookings.length,
-                itemBuilder: (context, index) {
-                  final c = _bookings[index];
-                  final isOwner = _user?.userType.toLowerCase() == "owner";
-
-                  return Card(
-                    margin: const EdgeInsets.all(10),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Opacity(
+            opacity: 0.15, // Soft logo background
+            child: Image.asset(
+              'images/logo.jpg',
+              height: 30,
+              width: 30,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Scaffold(
+          backgroundColor:
+              Colors.transparent, // ✅ Transparent to show the image
+          appBar: AppBar(
+            title: const Text("Booking Notifications"),
+            backgroundColor: const Color.fromARGB(255, 170, 165, 165).withOpacity(0.15), // Optional overlay
+            elevation: 0,
+          ),
+          body:
+              _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _bookings.isEmpty
+                  ? const Center(
+                    child: Text(
+                      "No new bookings",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Name: ${c.name}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text('Phone: ${c.mobile}'),
-                          Text('Destination: ${c.destination}'),
-                          Text('Members: ${c.members}'),
-                          Text('Date: ${c.dateFrom} to ${c.dateUpto}'),
-                          Text('Package: ${c.packageName}'),
-                          Text('Suggestion: ${c.suggestion}'),
-                          const SizedBox(height: 12),
-                          if (isOwner)
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Builder(
-                                builder: (context) {
-                                  if (c.status.toLowerCase() == 'confirmed') {
-                                    // Show green "Accepted" button (disabled)
-                                    return ElevatedButton(
-                                      onPressed: null, // disabled
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                      ),
-                                      child: const Text("Accepted"),
-                                    );
-                                  } else {
-                                    // Show action button based on current status
-                                    final isDeclined =
-                                        c.status.toLowerCase() == 'declined';
-                                    final buttonLabel =
-                                        isDeclined ? 'Declined' : 'Accept';
-                                    final buttonColor =
-                                        isDeclined ? Colors.red : Colors.blue;
+                  )
+                  : ListView.builder(
+                    itemCount: _bookings.length,
+                    itemBuilder: (context, index) {
+                      final c = _bookings[index];
+                      final isOwner = _user?.userType.toLowerCase() == "owner";
 
-                                    return ElevatedButton(
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            String driverName = '';
-                                            String status =
-                                                isDeclined
-                                                    ? 'Declined'
-                                                    : 'Confirmed';
+                      return Card(
+                        margin: const EdgeInsets.all(10),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Name: ${c.name}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text('Phone: ${c.mobile}'),
+                              Text('Destination: ${c.destination}'),
+                              Text('Members: ${c.members}'),
+                              Text('Date: ${c.dateFrom} to ${c.dateUpto}'),
+                              Text('Package: ${c.packageName}'),
+                              Text('Suggestion: ${c.suggestion}'),
+                              const SizedBox(height: 12),
+                              if (isOwner)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Builder(
+                                    builder: (context) {
+                                      if (c.status.toLowerCase() ==
+                                          'confirmed') {
+                                        return ElevatedButton(
+                                          onPressed: null,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                          ),
+                                          child: const Text("Accepted"),
+                                        );
+                                      } else {
+                                        final isDeclined =
+                                            c.status.toLowerCase() ==
+                                            'declined';
+                                        final buttonLabel =
+                                            isDeclined ? 'Declined' : 'Accept';
+                                        final buttonColor =
+                                            isDeclined
+                                                ? Colors.red
+                                                : Colors.blue;
 
-                                            return StatefulBuilder(
-                                              builder: (context, setState) {
-                                                return AlertDialog(
-                                                  title: const Text(
-                                                    'Assign Driver & Set Status',
-                                                  ),
-                                                  content: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      TextField(
-                                                        decoration:
-                                                            const InputDecoration(
-                                                              labelText:
-                                                                  'Driver Name',
-                                                            ),
-                                                        onChanged:
-                                                            (value) =>
-                                                                driverName =
-                                                                    value,
+                                        return ElevatedButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                String driverName = '';
+                                                String status =
+                                                    isDeclined
+                                                        ? 'Declined'
+                                                        : 'Confirmed';
+
+                                                return StatefulBuilder(
+                                                  builder: (context, setState) {
+                                                    return AlertDialog(
+                                                      title: const Text(
+                                                        'Assign Driver & Set Status',
                                                       ),
-                                                      const SizedBox(
-                                                        height: 10,
+                                                      content: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          TextField(
+                                                            decoration:
+                                                                const InputDecoration(
+                                                                  labelText:
+                                                                      'Driver Name',
+                                                                ),
+                                                            onChanged:
+                                                                (value) =>
+                                                                    driverName =
+                                                                        value,
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          DropdownButtonFormField<
+                                                            String
+                                                          >(
+                                                            value: status,
+                                                            decoration:
+                                                                const InputDecoration(
+                                                                  labelText:
+                                                                      'Status',
+                                                                ),
+                                                            items:
+                                                                [
+                                                                      'Confirmed',
+                                                                      'Declined',
+                                                                    ]
+                                                                    .map(
+                                                                      (
+                                                                        s,
+                                                                      ) => DropdownMenuItem(
+                                                                        value:
+                                                                            s,
+                                                                        child:
+                                                                            Text(
+                                                                              s,
+                                                                            ),
+                                                                      ),
+                                                                    )
+                                                                    .toList(),
+                                                            onChanged: (value) {
+                                                              if (value !=
+                                                                  null) {
+                                                                setState(
+                                                                  () =>
+                                                                      status =
+                                                                          value,
+                                                                );
+                                                              }
+                                                            },
+                                                          ),
+                                                        ],
                                                       ),
-                                                      DropdownButtonFormField<
-                                                        String
-                                                      >(
-                                                        value: status,
-                                                        decoration:
-                                                            const InputDecoration(
-                                                              labelText:
-                                                                  'Status',
-                                                            ),
-                                                        items:
-                                                            [
-                                                                  'Confirmed',
-                                                                  'Declined',
-                                                                ]
-                                                                .map(
-                                                                  (
-                                                                    s,
-                                                                  ) => DropdownMenuItem(
-                                                                    value: s,
-                                                                    child: Text(
-                                                                      s,
-                                                                    ),
-                                                                  ),
-                                                                )
-                                                                .toList(),
-                                                        onChanged: (value) {
-                                                          if (value != null) {
-                                                            setState(
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed:
                                                               () =>
-                                                                  status =
-                                                                      value,
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop(),
+                                                          child: const Text(
+                                                            'Cancel',
+                                                          ),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                              context,
+                                                            ).pop();
+                                                            _submitStatus(
+                                                              c.id,
+                                                              status,
+                                                              driverName,
                                                             );
-                                                          }
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed:
-                                                          () =>
-                                                              Navigator.of(
-                                                                context,
-                                                              ).pop(),
-                                                      child: const Text(
-                                                        'Cancel',
-                                                      ),
-                                                    ),
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop();
-                                                        _submitStatus(
-                                                          c.id,
-                                                          status,
-                                                          driverName,
-                                                        );
-                                                      },
-                                                      child: const Text(
-                                                        'Submit',
-                                                      ),
-                                                    ),
-                                                  ],
+                                                          },
+                                                          child: const Text(
+                                                            'Submit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
                                                 );
                                               },
                                             );
                                           },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: buttonColor,
+                                          ),
+                                          child: Text(buttonLabel),
                                         );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: buttonColor,
-                                      ),
-                                      child: Text(buttonLabel),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                                      }
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+        ),
+      ],
     );
   }
 }

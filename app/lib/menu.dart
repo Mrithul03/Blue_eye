@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart'; // For LoginPage
 import 'api.dart'; // For UserModel
+import 'accept.dart';
+import 'reject.dart';
+import 'pending.dart';
 
 class MenuTab extends StatelessWidget {
   final UserModel? user;
 
-  const MenuTab({super.key, required this.user}); // ✅ this must exist
+  const MenuTab({super.key, required this.user});
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -33,7 +36,7 @@ class MenuTab extends StatelessWidget {
           children: [
             const CircleAvatar(
               radius: 50,
-              backgroundImage: AssetImage('assets/profile_dummy.png'),
+              backgroundImage: AssetImage('images/logo.jpg'),
             ),
             const SizedBox(height: 20),
             Text(
@@ -50,25 +53,60 @@ class MenuTab extends StatelessWidget {
               "Role: ${user!.userType}",
               style: const TextStyle(fontSize: 16, color: Colors.black54),
             ),
-            const Divider(height: 40),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text("Settings"),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Settings tapped")),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text("About"),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("About tapped")),
-                );
-              },
-            ),
+
+            // 👇 Show only if user is 'owner'
+            if (user!.userType.toLowerCase() == "owner") ...[
+              const Divider(height: 40),
+              ListTile(
+                leading: const Icon(Icons.check_circle, color: Colors.green),
+                title: const Text("Accepted"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AcceptedCustomersPage(),
+                    ),
+                  );
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.cancel, color: Colors.red),
+                title: const Text("Declined"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RejectedCustomersPage(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.hourglass_top, color: Colors.orange),
+                title: const Text("Pending"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PendingCustomersPage(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.group_add, color: Colors.blue),
+                title: const Text("Add Users"),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Add Users tapped")),
+                  );
+                },
+              ),
+            ],
+
+            // 🔒 Always show logout
+            const Divider(height: 30),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Logout"),

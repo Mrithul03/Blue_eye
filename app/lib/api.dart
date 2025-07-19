@@ -6,8 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<String> login({required String phone, required String password}) async {
   try {
     final response = await http.post(
-      Uri.parse('http://192.168.1.17:8000/api/login/'),
+      // Uri.parse('http://192.168.1.17:8000/api/login/'),
       // Uri.parse('http://127.0.0.1:8000/api/login/'),
+      Uri.parse('https://mdgroup.pythonanywhere.com/api/login/'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode({'phone': phone, 'password': password}),
     );
@@ -20,7 +21,7 @@ Future<String> login({required String phone, required String password}) async {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('device_token', token);
-      await prefs.setInt('user_id', userId); // ✅ Save user_id
+      await prefs.setInt('user_id', userId); 
 
       return token;
     }
@@ -105,8 +106,10 @@ class UserModel {
 
 /// 📡 API service
 class ApiService {
-  final String baseUrl = 'http://192.168.1.17:8000/api';
+  // final String baseUrl = 'http://192.168.1.17:8000/api';
   // final String baseUrl = 'http://127.0.0.1:8000/api';
+  final String baseUrl = 'https://mdgroup.pythonanywhere.com/api/';
+  
 
   /// 📥 Fetch customers (requires auth)
   Future<List<Customer>> fetchCustomers() async {
@@ -155,8 +158,9 @@ class ApiService {
       }
 
       final response = await http.get(
-        Uri.parse('http://192.168.1.17:8000/api/users/'),
+        // Uri.parse('http://192.168.1.17:8000/api/users/'),
         // Uri.parse('http://127.0.0.1:8000/api/users/'),
+        Uri.parse('https://mdgroup.pythonanywhere.com/api/users/'),
         headers: {
           'Authorization': 'Token $token',
           'Content-Type': 'application/json',
