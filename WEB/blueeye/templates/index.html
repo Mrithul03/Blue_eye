@@ -11,7 +11,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>BLUE EYES.co</title>
+	<title>BLUE EYES</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Free HTML5 Website Template by FreeHTML5.co" />
 	<meta name="keywords"
@@ -52,6 +52,7 @@
 
 	<!-- Theme style  -->
 	<link rel="stylesheet" href="{% static 'css/style.css' %}">
+	<link rel="icon" href="{% static 'images/blueeyes.png' %}">
 
 	<!-- Modernizr JS -->
 	<script src="{% static 'js/modernizr-2.6.2.min.js' %}"></script>
@@ -73,11 +74,14 @@
 
 				<div class="row">
 					<div class="col-sm-4 col-xs-12">
-						<div id="gtco-logo"><a href="{% url 'myview' %}">Blue<em>.</em>Eyes Holidays</a></div>
+						<div id="gtco-logo"><a href="{% url 'myview' %}">
+							<img src="{% static 'images/blue_eye_logo.jpg' %}" alt="Image" style="height: 70px;">
+							<!-- Blue<em>.</em>Eyes Holidays -->
+						</a></div>
 					</div>
 					<div class="col-xs-8 text-right menu-1">
 						<ul>
-							<li><a href="{% url 'myview' %}">HOME</a></li>
+							<!-- <li><a href="{% url 'myview' %}">HOME</a></li> -->
 							<!-- <li class="has-dropdown">
 								<a href="#">Travel</a>
 								<ul class="dropdown">
@@ -88,7 +92,7 @@
 								</ul>
 							</li>
 							<li><a href="pricing.html">Pricing</a></li> -->
-							<li><a href="{% url 'contact' %}">CONTACT</a></li>
+							<!-- <li><a href="{% url 'contact' %}">CONTACT</a></li> -->
 						</ul>
 					</div>
 				</div>
@@ -317,8 +321,8 @@
 
 
 
-		<div class="gtco-cover gtco-cover-sm" style="background-image: url(images/img_bg_1.jpg)"
-			data-stellar-background-ratio="0.5">
+		<div class="gtco-cover gtco-cover-sm" style="background-image: url(/static/images/bg-1.jpg)"
+			>
 			<div class="overlay"></div>
 			<div class="gtco-container text-center">
 				<div class="display-t">
