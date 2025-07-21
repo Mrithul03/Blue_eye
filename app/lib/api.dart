@@ -12,6 +12,7 @@ Future<String> login({required String phone, required String password}) async {
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode({'phone': phone, 'password': password}),
     );
+    print('👤 login response: ${response.body}');
 
     final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
 
@@ -50,6 +51,7 @@ class Customer {
   final String packageName;
   final String suggestion;
   final String status;
+  final String? driver; 
 
   Customer({
     required this.id,
@@ -62,6 +64,7 @@ class Customer {
     required this.packageName,
     required this.suggestion,
     required this.status,
+    required this.driver, 
   });
 
   factory Customer.fromJson(Map<String, dynamic> json) {
@@ -76,6 +79,7 @@ class Customer {
       packageName: json['package'] ?? '',
       suggestion: json['suggestion'] ?? '',
       status: json['status'] ?? '',
+      driver: json['driver'],
     );
   }
 }
@@ -86,12 +90,14 @@ class UserModel {
   final String name;
   final String phone;
   final String userType;
+  final String deviceToken;
 
   UserModel({
     required this.id,
     required this.name,
     required this.phone,
     required this.userType,
+    required this.deviceToken,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -100,6 +106,7 @@ class UserModel {
       name: json['name'] ?? '',
       phone: json['phone'] ?? '',
       userType: json['user_type'] ?? '',
+      deviceToken: json['device_token']?? '',
     );
   }
 }
@@ -166,6 +173,8 @@ class ApiService {
           'Content-Type': 'application/json',
         },
       );
+      print('👤 fetchuser response: ${response.body}');
+      
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
