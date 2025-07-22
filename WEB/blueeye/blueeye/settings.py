@@ -38,12 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app1',
+    'blueeye.app1',
     'rest_framework',
     'rest_framework.authtoken'
-
-    
-
 ]
 
 MIDDLEWARE = [
@@ -81,12 +78,23 @@ WSGI_APPLICATION = 'blueeye.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'blue_eye',
+#         'USER':'root',
+#         'PASSWORD':'mrithul@03'
+#     }
+# }
+
+DATABASES={
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'blue_eye',
-        'USER':'root',
-        'PASSWORD':'mrithul@03'
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'blue_eye_db',  # Your database name
+        'USER': 'blue_eye_db_user',  # PostgreSQL username
+        'PASSWORD': 'MLdT1cRMkG3PfRKu343UAlLElTFMA15L',  # PostgreSQL password
+        'HOST': 'dpg-d1vi02fdiees73bm47kg-a',  # Or the host where your database is running
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
 
@@ -125,10 +133,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
-STATICFILES_DIRS=[
-    BASE_DIR/"static",
+# Directory where collected static files will be stored (for production)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# List of directories where Django will look for static files during development
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # Ensure this is the directory where your static files are located
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
