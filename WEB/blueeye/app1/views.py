@@ -11,7 +11,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib import messages
 
 
 # === STATIC PAGE VIEWS ===
@@ -25,8 +24,8 @@ class Myview(View):
         form = BookingForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "🎉 ✅ Booking successful! Our team will contact you within an hour!")
-            return render(request, 'index.html', {'form': BookingForm(), 'msg': messages})
+            msg = "Successfully booked! Please check your booking status. We will contact you within 2 hours."
+            return render(request, 'index.html', {'form': BookingForm(), 'msg': msg})
         return render(request, 'index.html', {'form': form})
 
 
@@ -44,26 +43,26 @@ def login_user(request):
     phone = request.data.get('phone')
     password = request.data.get('password')
 
-    print(f"📥 Login attempt: phone={phone}, password={password}")
-
     try:
+         # Step 1: Find profile using phone number
         profile = UserProfile.objects.get(phone=phone)
-        print(f"✅ Found UserProfile: {profile}")
 
+        # Step 2: Get linked user from profile
         user = profile.user
-        print(f"✅ Linked User: id={user.id}, first_name={user.first_name}, stored_password={user.password}")
 
+
+
+        # Check profile.phone match and password match (insecure way)
         if profile.phone != phone or user.password != password:
-            print("❌ Invalid phone or password")
             return Response({'error': 'Invalid credentials'}, status=401)
 
+        # Token generation
         Token.objects.filter(user=user).delete()
         token = Token.objects.create(user=user)
-        print(f"🔑 New token created: {token.key}")
 
+        # Save device_token
         profile.device_token = token.key
         profile.save()
-        print(f"📦 Saved token in UserProfile.device_token: {profile.device_token}")
 
         return Response({
             'message': 'Login successful',
@@ -74,8 +73,7 @@ def login_user(request):
             'user_type': profile.user_type,
         }, status=status.HTTP_200_OK)
 
-    except (User.DoesNotExist, UserProfile.DoesNotExist) as e:
-        print(f"❌ User does not exist: {e}")
+    except (User.DoesNotExist, UserProfile.DoesNotExist):
         return Response({'error': 'User does not exist'}, status=404)
 
 
@@ -100,12 +98,12 @@ def user_list(request):
             user_type = profile.user_type
         except UserProfile.DoesNotExist:
             user_type = 'Owner'  # default fallback if profile missing
+
         user_data.append({
             'id': user.id,
             'name': user.first_name,       # stored as name
             'phone': user.username,        # phone stored in username
             'user_type': user_type,
-            'device_token': profile.device_token,
         })
 
     return Response(user_data, status=status.HTTP_200_OK)
