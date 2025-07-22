@@ -81,12 +81,23 @@ WSGI_APPLICATION = 'blueeye.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'blue_eye',
+#         'USER':'root',
+#         'PASSWORD':'mrithul@03'
+#     }
+# }
+
+DATABASES={
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'blue_eye',
-        'USER':'root',
-        'PASSWORD':'mrithul@03'
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'blue_eye_db',  # Your database name
+        'USER': 'blue_eye_db_user',  # PostgreSQL username
+        'PASSWORD': 'MLdT1cRMkG3PfRKu343UAlLElTFMA15L',  # PostgreSQL password
+        'HOST': 'dpg-d1vi02fdiees73bm47kg-a',  # Or the host where your database is running
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
 
