@@ -75,9 +75,9 @@
 				<div class="row">
 					<div class="col-sm-4 col-xs-12">
 						<div id="gtco-logo"><a href="{% url 'myview' %}">
-							<img src="{% static 'images/blue_eye_logo.jpg' %}" alt="Image" style="height: 70px;">
-							<!-- Blue<em>.</em>Eyes Holidays -->
-						</a></div>
+								<img src="{% static 'images/blue_eye_logo.jpg' %}" alt="Image" style="height: 70px;">
+								<!-- Blue<em>.</em>Eyes Holidays -->
+							</a></div>
 					</div>
 					<div class="col-xs-8 text-right menu-1">
 						<ul>
@@ -104,8 +104,15 @@
 			<div class="overlay"></div>
 			<div class="gtco-container">
 				<div class="row">
-					<div class="col-md-12 text-left">
 						<div class="row align-items-center d-flex" style="margin-top: 15em;">
+							<div class="col-md-12 text-left">
+						{% if messages %}
+						<div id="message-box" class="alert alert-success">
+							{% for message in messages %}
+							{{ message }}
+							{% endfor %}
+						</div>
+						{% endif %}
 							<!-- Left: Heading -->
 							<div class="col-md-8 animate-box" data-animate-effect="fadeInUp">
 								<h1><strong>Planning Trip To Anywhere?</strong></h1>
@@ -127,6 +134,13 @@
 				<div class="col-md-8 col-md-offset-2 text-center gtco-heading">
 					<h2>Book Your Trip</h2>
 				</div>
+				<!-- {% if messages %}
+				<div class="alert alert-success">
+					{% for message in messages %}
+					{{ message }}
+					{% endfor %}
+				</div>
+				{% endif %} -->
 				<form class="form-group" id="booking-form" method="post" action="{% url 'myview' %}">
 					{% csrf_token %}
 					<div class="col-md-6">
@@ -321,8 +335,7 @@
 
 
 
-		<div class="gtco-cover gtco-cover-sm" style="background-image: url(/static/images/bg-1.jpg)"
-			>
+		<div class="gtco-cover gtco-cover-sm" style="background-image: url(/static/images/bg-1.jpg)">
 			<div class="overlay"></div>
 			<div class="gtco-container text-center">
 				<div class="display-t">
@@ -528,6 +541,30 @@
 		});
 	</script>
 
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const dateFrom = document.getElementById("id_date_from");
+			const dateUpto = document.getElementById("id_date_upto");
+
+			const today = new Date().toISOString().split('T')[0];
+			dateFrom.setAttribute("min", today);
+
+			dateFrom.addEventListener("change", function () {
+				dateUpto.value = ""; // clear any previous value
+				dateUpto.setAttribute("min", this.value);
+			});
+		});
+	</script>
+
+
+	<script>
+		setTimeout(function () {
+			const box = document.getElementById('message-box');
+			if (box) {
+				box.style.display = 'none';
+			}
+		}, 5000); // 10000ms = 10 seconds
+	</script>
 
 
 </body>

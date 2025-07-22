@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib import messages
 
 
 # === STATIC PAGE VIEWS ===
@@ -24,8 +25,8 @@ class Myview(View):
         form = BookingForm(request.POST)
         if form.is_valid():
             form.save()
-            msg = "Successfully booked! Please check your booking status. We will contact you within 2 hours."
-            return render(request, 'index.html', {'form': BookingForm(), 'msg': msg})
+            messages.success(request, "🎉 ✅ Booking successful! Our team will contact you within an hour!")
+            return render(request, 'index.html', {'form': BookingForm(), 'msg': messages})
         return render(request, 'index.html', {'form': form})
 
 
