@@ -1,1 +1,1 @@
-web: gunicorn WEB.Blue_eye.wsgi:application
+web: gunicorn WEB.blueeye.wsgi:application
